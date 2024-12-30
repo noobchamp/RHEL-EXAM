@@ -37,12 +37,20 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 ### Configuración de autenticación basada en claves SSH
 
 - **Comandos clave**:
-  - `ssh-keygen -t rsa -b 2048`: Generar claves SSH.
-  - `ssh-copy-id user@remotehost`: Copiar clave pública al servidor remoto.
+  - `ssh-keygen -f .ssh/key-with-pass`: Generar ficheros de claves.
+  - `ssh-keygen -t rsa -b 2048`: Generar claves SSH de 2048.
+  - `ssh-copy-id -i .ssh/key-with-pass.pub user@remotehost`: Copiar clave pública al servidor remoto.
+  - `eval $(ssh-agent)`: Inicar ssh-agent. Con eval hacemos que las variables que imprime las insertemos directamente.
+  - `ssh-add .ssh/key-with-pass`. Añadir la parafrase en caché para el archivo _key-with-pass_.
 
 ### Creación de un informe de diagnóstico
 
-- **Comando**: `sosreport`
+- **Comando**: 
+  - `sos report`. Reporte del nodo local.
+  - `sos collect`. Reporte de un cluster.
+  - `sos clean /var/tmp/sos-report.tgz`. Eliminar la información confidencial de un sos report.
+  - `systemctl start cockpit.socket`. Iniciar la consola web cockpit.
+  - `insights-client --register`. Registrar en insights. 
 
 ---
 
@@ -51,9 +59,12 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 ### Comandos básicos de gestión de archivos
 
 - **Comandos clave**:
-  - `cp`, `mv`, `rm`: Copiar, mover y eliminar archivos.
-  - `ln -s`: Crear enlaces simbólicos.
-  - `find /path -name "*.txt"`: Buscar archivos.
+  - `ln fichero.txt enalce_duro.txt`. Crear un enlace duro (tienen el mismo inodo).
+  - `ln -s /home/user/fichero.txt /tmp/enlace_simbolico.txt`. Crear un enlace simbólico. 
+
+> [!TIP]
+> `cd -P` te lleva al directorio real si lo ejecutas sobre un directorio "simbólico".
+> Las comillas dobles (") interpretan variables mientras que comillas simple (') NO las interpretan.
 
 ---
 
@@ -61,13 +72,29 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 
 ### Creación y administración de usuarios
 
-- **Comandos clave**:
-  - `useradd username`: Crear un nuevo usuario.
-  - `usermod -aG groupname username`: Agregar un usuario a un grupo.
+Opciones del comando usermod:
 
-### Obtención de acceso de superusuario
+| Opción                 | Descripción                                                                                                   |
+|-------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `-a, --append`          | Se utiliza con la opción `-G` para agregar los grupos complementarios al conjunto actual de membresías de grupo del usuario en lugar de reemplazar el conjunto de grupos complementarios con un nuevo conjunto. |
+| `-c, --comment COMMENT` | Agregar el texto `COMMENT` en el campo de comentarios.                                                          |
+| `-d, --home HOME_DIR`   | Especificar un directorio de inicio para la cuenta de usuario.                                                  |
+| `-g, --gid GROUP`       | Especificar el grupo principal para la cuenta de usuario.                                                       |
+| `-G, --groups GROUPS`   | Especificar una lista de grupos complementarios separados por comas para la cuenta de usuario.                  |
+| `-L, --lock`            | Bloquear la cuenta de usuario.                                                                                  |
+| `-m, --move-home`       | Mover el directorio de inicio del usuario a una nueva ubicación. Debe usarlo con la opción `-d`.                |
+| `-s, --shell SHELL`     | Especificar una shell de inicio de sesión particular para la cuenta de usuario.                                 |
+| `-U, --unlock`          | Desbloquear la cuenta de usuario.                                                                               |
 
-- **Comando clave**: `sudo su`
+chage -m 0 -M 90 -W 7 -I 14 sysadmin05:
+
+- `-m 0`: Establece el **mínimo número de días entre cambios de contraseña**. Un valor de `0` significa que el usuario puede cambiar su contraseña en cualquier momento.  
+- `-M 90`: Especifica el **máximo número de días que una contraseña puede ser utilizada**. La contraseña caducará después de 90 días.  
+- `-W 7`: Define el **número de días de advertencia antes de la caducidad de la contraseña**. El usuario recibirá una notificación 7 días antes de que la contraseña expire.  
+- `-I 14`: Establece el **número de días de inactividad permitidos después de la caducidad de la contraseña**. Si el usuario no cambia su contraseña en los 14 días posteriores a la caducidad, la cuenta será bloqueada.  
+- `usuario`: Especifica el **nombre del usuario** al que se aplican las políticas definidas.  
+
+_chage -d 0 cloudadmin10_: El usuario debe cambiar la contraseña en el próximo inico de sesión.
 
 ---
 
