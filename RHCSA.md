@@ -4,27 +4,27 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 
 ## Tabla de Contenidos
 
-1. Acceso a los sistemas y obtención de soporte (Importancia: 5)
-2. Gestión de archivos desde la línea de comandos (Importancia: 5)
-3. Gestión de usuarios y grupos locales (Importancia: 5)
-4. Control de acceso a archivos (Importancia: 4)
-5. Gestión de la seguridad con SELinux (Importancia: 5)
-6. Ajuste del rendimiento del sistema (Importancia: 3)
-7. Programación de tareas futuras (Importancia: 3)
-8. Instalación y actualización de paquetes de software (Importancia: 4)
-9. Gestión de almacenamiento básico (Importancia: 5)
-10. Gestión de la pila de almacenamiento (Importancia: 4)
-11. Servicios de control y procesos de arranque (Importancia: 5)
-12. Análisis y almacenamiento de registros (Importancia: 4)
-13. Gestión de redes (Importancia: 5)
-14. Acceso al almacenamiento conectado a la red (Importancia: 3)
-15. Gestión de la seguridad de redes (Importancia: 4)
-16. Ejecución de contenedores (Importancia: 3)
-17. Revisión exhaustiva (Importancia: 5)
+1. Acceso a los sistemas y obtención de soporte
+2. Gestión de archivos desde la línea de comandos
+3. Gestión de usuarios y grupos locales
+4. Control de acceso a archivos
+5. Gestión de la seguridad con SELinux
+6. Ajuste del rendimiento del sistema
+7. Programación de tareas futuras
+8. Instalación y actualización de paquetes de software
+9. Gestión de almacenamiento básico
+10. Gestión de la pila de almacenamiento
+11. Servicios de control y procesos de arranque
+12. Análisis y almacenamiento de registros
+13. Gestión de redes
+14. Acceso al almacenamiento conectado a la red
+15. Gestión de la seguridad de redes
+16. Ejecución de contenedores
+17. Revisión exhaustiva
 
 ---
 
-## 1. Acceso a los sistemas y obtención de soporte (Importancia: 5)
+## 1. Acceso a los sistemas y obtención de soporte
 
 ### Edición de archivos de texto desde el prompt de shell (Vim)
 
@@ -54,7 +54,7 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 
 ---
 
-## 2. Gestión de archivos desde la línea de comandos (Importancia: 5)
+## 2. Gestión de archivos desde la línea de comandos
 
 ### Comandos básicos de gestión de archivos
 
@@ -68,7 +68,7 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 
 ---
 
-## 3. Gestión de usuarios y grupos locales (Importancia: 5)
+## 3. Gestión de usuarios y grupos locales
 
 ### Creación y administración de usuarios
 
@@ -105,7 +105,7 @@ chage -m 0 -M 90 -W 7 -I 14 sysadmin05:
 
 ---
 
-## 4. Control de acceso a archivos (Importancia: 4)
+## 4. Control de acceso a archivos
 
 ### Gestión de permisos de archivos
 
@@ -176,7 +176,7 @@ chage -m 0 -M 90 -W 7 -I 14 sysadmin05:
 
 ---
 
-## 5. Gestión de la seguridad de SELinux (Importancia: 5)
+## 5. Gestión de la seguridad de SELinux
 
 **Estructura de selinux:**
   unconfined_u:object_r httpd_sys_content_t:s0 /var/www/html/File2
@@ -209,7 +209,7 @@ restorecon -v /virtual/
 
 ---
 
-## 6. Ajuste del rendimiento del sistema (Importancia: 3)
+## 6. Ajuste del rendimiento del sistema
 
 ### Finalización y monitoreo de procesos
 
@@ -219,7 +219,7 @@ restorecon -v /virtual/
 
 ---
 
-## 7. Programación de tareas futuras (Importancia: 3)
+## 7. Programación de tareas futuras
 
 ### Uso de cron
 
@@ -227,7 +227,7 @@ restorecon -v /virtual/
 
 ---
 
-## 8. Instalación y actualización de paquetes de software (Importancia: 4)
+## 8. Instalación y actualización de paquetes de software
 
 ### Gestión de paquetes con DNF
 
@@ -235,7 +235,7 @@ restorecon -v /virtual/
 
 ---
 
-## 9. Gestión de almacenamiento básico (Importancia: 5)
+## 9. Gestión de almacenamiento básico
 
 ### Montaje de sistemas de archivos
 
@@ -245,7 +245,7 @@ restorecon -v /virtual/
 
 ---
 
-## 10. Gestión de la pila de almacenamiento (Importancia: 4)
+## 10. Gestión de la pila de almacenamiento
 
 ### Creación de volúmenes lógicos
 
@@ -253,7 +253,7 @@ restorecon -v /virtual/
 
 ---
 
-## 11. Servicios de control y proceso de arranque (Importancia: 5)
+## 11. Servicios de control y proceso de arranque
 
 ### Control de servicios
 
@@ -261,7 +261,7 @@ restorecon -v /virtual/
 
 ---
 
-## 12. Análisis y almacenamiento de registros (Importancia: 4)
+## 12. Análisis y almacenamiento de registros
 
 ### Revisión de logs del sistema
 
@@ -269,7 +269,7 @@ restorecon -v /virtual/
 
 ---
 
-## 13. Gestión de redes (Importancia: 5)
+## 13. Gestión de redes
 
 ### Configuración de redes desde la línea de comandos
 
@@ -277,7 +277,7 @@ restorecon -v /virtual/
 
 ---
 
-## 14. Acceso al almacenamiento conectado a la red (Importancia: 3)
+## 14. Acceso al almacenamiento conectado a la red
 
 ### Gestión de almacenamiento NFS
 
@@ -285,7 +285,7 @@ restorecon -v /virtual/
 
 ---
 
-## 15. Gestión de la seguridad de redes (Importancia: 4)
+## 15. Gestión de la seguridad de redes
 
 ### Configuración de firewalls
 
@@ -293,7 +293,7 @@ restorecon -v /virtual/
 
 ---
 
-## 16. Ejecución de contenedores (Importancia: 3)
+## 16. Ejecución de contenedores
 
 ### Uso de contenedores
 
@@ -491,7 +491,7 @@ loginctl disable-linger
 
 ---
 
-## 17. Revisión exhaustiva (Importancia: 5)
+## 17. Revisión exhaustiva
 
 ### Resumen de conceptos clave y comandos
 
