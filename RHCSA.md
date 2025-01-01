@@ -45,12 +45,12 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 
 ### Creación de un informe de diagnóstico
 
-- **Comando**: 
+- **Comando**:
   - `sos report`. Reporte del nodo local.
   - `sos collect`. Reporte de un cluster.
   - `sos clean /var/tmp/sos-report.tgz`. Eliminar la información confidencial de un sos report.
   - `systemctl start cockpit.socket`. Iniciar la consola web cockpit.
-  - `insights-client --register`. Registrar en insights. 
+  - `insights-client --register`. Registrar en insights.
 
 ---
 
@@ -60,7 +60,7 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 
 - **Comandos clave**:
   - `ln fichero.txt enalce_duro.txt`. Crear un enlace duro (tienen el mismo inodo).
-  - `ln -s /home/user/fichero.txt /tmp/enlace_simbolico.txt`. Crear un enlace simbólico. 
+  - `ln -s /home/user/fichero.txt /tmp/enlace_simbolico.txt`. Crear un enlace simbólico.
 
 > [!TIP]
 > `cd -P` te lleva al directorio real si lo ejecutas sobre un directorio "simbólico".
@@ -72,19 +72,25 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 
 ### Creación y administración de usuarios
 
+- **Comandos clave**:
+  - `chage -d 0 cloudadmin10`: El usuario debe cambiar la contraseña en el próximo inico de sesión.
+  - `usermod -L`: Bloquea la cuenta del usuario.
+  - `usermod -L -e 2022-08-14 cloudadmin10`: Bloquear la cuenta el día 14/08/2022.
+  - `usermod -s /sbin/nologin newapp`: Cuenta sin login.
+
 Opciones del comando usermod:
 
-| Opción                 | Descripción                                                                                                   |
-|-------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `-a, --append`          | Se utiliza con la opción `-G` para agregar los grupos complementarios al conjunto actual de membresías de grupo del usuario en lugar de reemplazar el conjunto de grupos complementarios con un nuevo conjunto. |
-| `-c, --comment COMMENT` | Agregar el texto `COMMENT` en el campo de comentarios.                                                          |
-| `-d, --home HOME_DIR`   | Especificar un directorio de inicio para la cuenta de usuario.                                                  |
-| `-g, --gid GROUP`       | Especificar el grupo principal para la cuenta de usuario.                                                       |
-| `-G, --groups GROUPS`   | Especificar una lista de grupos complementarios separados por comas para la cuenta de usuario.                  |
-| `-L, --lock`            | Bloquear la cuenta de usuario.                                                                                  |
-| `-m, --move-home`       | Mover el directorio de inicio del usuario a una nueva ubicación. Debe usarlo con la opción `-d`.                |
-| `-s, --shell SHELL`     | Especificar una shell de inicio de sesión particular para la cuenta de usuario.                                 |
-| `-U, --unlock`          | Desbloquear la cuenta de usuario.                                                                               |
+| Opción del comando usermod  | Descripción                                                                                                     |
+|-----------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `-a, --append`              | Se utiliza con la opción `-G` para agregar los grupos complementarios                                           |
+| `-c, --comment COMMENT`     | Agregar el texto `COMMENT` en el campo de comentarios.                                                          |
+| `-d, --home HOME_DIR`       | Especificar un directorio de inicio para la cuenta de usuario.                                                  |
+| `-g, --gid GROUP`           | Especificar el grupo principal para la cuenta de usuario.                                                       |
+| `-G, --groups GROUPS`       | Especificar una lista de grupos complementarios separados por comas para la cuenta de usuario.                  |
+| `-L, --lock`                | Bloquear la cuenta de usuario.                                                                                  |
+| `-m, --move-home`           | Mover el directorio de inicio del usuario a una nueva ubicación. Debe usarlo con la opción `-d`.                |
+| `-s, --shell SHELL`         | Especificar una shell de inicio de sesión particular para la cuenta de usuario.                                 |
+| `-U, --unlock`              | Desbloquear la cuenta de usuario.                                                                               |
 
 chage -m 0 -M 90 -W 7 -I 14 sysadmin05:
 
@@ -94,7 +100,8 @@ chage -m 0 -M 90 -W 7 -I 14 sysadmin05:
 - `-I 14`: Establece el **número de días de inactividad permitidos después de la caducidad de la contraseña**. Si el usuario no cambia su contraseña en los 14 días posteriores a la caducidad, la cuenta será bloqueada.  
 - `usuario`: Especifica el **nombre del usuario** al que se aplican las políticas definidas.  
 
-_chage -d 0 cloudadmin10_: El usuario debe cambiar la contraseña en el próximo inico de sesión.
+> [!TIP]
+ Puedes cambiar la configuración de vigencia de la contraseña predeterminada en el archivo /etc/login.defs. Las opciones PASS_MAX_DAYS y PASS_MIN_DAYS establecen la antigüedad máxima y mínima predeterminada de la contraseña, respectivamente. PASS_WARN_AGE define el período de advertencia predeterminado de la contraseña.
 
 ---
 
@@ -107,14 +114,94 @@ _chage -d 0 cloudadmin10_: El usuario debe cambiar la contraseña en el próximo
   - `chown`: Cambiar propietario de archivos.
   - `umask`: Configurar permisos predeterminados.
 
+### Permisos especiales
+
+- **SUID (Set User ID):**  
+  Permite que un programa se ejecute con los permisos del propietario del archivo en lugar del usuario que lo ejecuta.  
+  **Se aplica a:** Archivos ejecutables.  
+  **Uso típico:** Programas que necesitan privilegios elevados, como `passwd`.  
+  **Cómo funciona:** Si un archivo tiene SUID activo y es ejecutado por un usuario, el proceso se ejecutará con los permisos del propietario del archivo.  
+  **Ejemplo:**  
+
+  ```bash
+  -rwsr-xr-x 1 root root 12345 /usr/bin/passwd
+  ```  
+
+  La "s" en los permisos del propietario indica que el bit SUID está activo.  
+  **Comando para establecer SUID:**  
+
+  ```bash
+  chmod u+s archivo
+  ```
+
+- **SGID (Set Group ID):**
+  En archivos ejecutables, permite que el programa se ejecute con los permisos del grupo propietario. En directorios, asegura que los nuevos archivos creados hereden el grupo del directorio.  
+  **Se aplica a:** Archivos ejecutables y directorios.  
+  **Uso típico:**  
+  - En archivos ejecutables: Para ejecutar programas con permisos de grupo específicos.  
+  - En directorios: Para compartir archivos con un grupo sin necesidad de cambiar manualmente el grupo de cada archivo.  
+  **Cómo funciona:**  
+  - En un archivo ejecutable: El proceso pertenece al grupo propietario del archivo, no al grupo del usuario.  
+  - En un directorio: Los nuevos archivos o subdirectorios creados heredan el grupo propietario del directorio principal.  
+  **Ejemplo:**  
+
+  ```bash
+  drwxrwsr-x 2 user grupo 4096 /shared
+  ```  
+
+  La "s" en los permisos del grupo indica que el bit SGID está activo.  
+  **Comando para establecer SGID:**  
+
+  ```bash
+  chmod g+s archivo_o_directorio
+  ```
+
+- **Sticky Bit:**  
+  Restringe el borrado de archivos en un directorio solo al propietario del archivo o a `root`.  
+  **Se aplica a:** Directorios.  
+  **Uso típico:** Directorios compartidos como `/tmp`.  
+  **Cómo funciona:** Cuando Sticky Bit está activo en un directorio, solo el propietario del archivo (o root) puede eliminar o renombrar archivos dentro del directorio.  
+  **Ejemplo:**  
+
+  ```bash
+  drwxrwxrwt 2 root root 4096 /tmp
+  ```
+
+  La "t" en los permisos de otros indica que el Sticky Bit está activo.  
+  **Comando para establecer Sticky Bit:**  
+
+  ```bash
+  chmod +t directorio
+  ```
+
 ---
 
 ## 5. Gestión de la seguridad de SELinux (Importancia: 5)
+
+**Estructura de selinux:**
+  unconfined_u:object_r httpd_sys_content_t:s0 /var/www/html/File2
+  user:role:type:security_level:file
 
 ### Modificación de los modos de SELinux
 
 - **Comandos clave**:
   - `getenforce`, `setenforce`: Ver y cambiar el modo de SELinux.
+  - `semanage fcontext`
+  - `restorecon`
+  - `chcon`
+
+`chcon` permite cambiar en contexto de un fichero o directorio temporalmente (se usa de manera temporal para depurar), sin embargo, `restorecon`volverá a poner en contexto original.
+
+```bash
+mkdir /virtual
+ls -Zd /virtual/
+# unconfined_u:object_r:default_t:s0 /virtual/
+chcon -t httpd_sys_content_t /virtual/
+ls -Zd /virtual/
+# unconfined_u:object_r:httpd_sys_content_t:s0 /virtual/
+restorecon -v /virtual/
+# Relabeled /virtual from unconfined_u:object_r:httpd_sys_content_t:s0 to unconfined_u:object_r:default_t:s0
+```
 
 ### Ajuste de booleanos de SELinux
 
@@ -359,7 +446,6 @@ podman run --replace -d --name db01 \
 
 para conectar una red a un contenedor `podman network connect red01 contenedor01`.
 
-
 ### Gestión de contenedores como servicios del sistema
 
 > [!WARNING]
@@ -402,7 +488,6 @@ loginctl enable-linger
 # Desactivar Lingerin
 loginctl disable-linger 
 ```
-
 
 ---
 
