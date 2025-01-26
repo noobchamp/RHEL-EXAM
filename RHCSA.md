@@ -187,8 +187,12 @@ chage -m 0 -M 90 -W 7 -I 14 sysadmin05:
 - **Comandos clave**:
   - `getenforce`, `setenforce`: Ver y cambiar el modo de SELinux.
   - `semanage fcontext`
+  - `semanage fcontext -l`: Lista todos los contextos y path.
+  - `semanage fcontext -l -C`: Listar solo las políticas creadas.
   - `restorecon`
+  - `restorecon -Rv /var/www/`: Restaura el contexto recursivamente. -R [recursive] -v [verbose]
   - `chcon`
+
 
 `chcon` permite cambiar en contexto de un fichero o directorio temporalmente (se usa de manera temporal para depurar), sin embargo, `restorecon`volverá a poner en contexto original.
 
@@ -203,9 +207,45 @@ restorecon -v /virtual/
 # Relabeled /virtual from unconfined_u:object_r:httpd_sys_content_t:s0 to unconfined_u:object_r:default_t:s0
 ```
 
+>[!WARNING]
+>Los archivos copiados cambian de contexto pero los archivos movidos no cambian de contexto.
+
+>[!TIP]
+>La expresión regular de los contextos más conocida es el `PIRATA` **(/.*)?**
+>
+>**/var/www/cgi-bin(/.*)?**
+>
+>Un conjunto de caracteres que comienza con una barra y va seguido de cualquier número de caracteres, donde el conjunto puede existir o no
+
+### Crear una nueva etiqueta
+
+Creamos un directorio nuevo. Posteriormente asignamos el contexto para ese directorio y aplicamos.
+
+```bash
+[root@central ~]$ mkdir /app
+[root@central ~]$ ls -ldZ /app/
+drwxr-xr-x. 2 root root unconfined_u:object_r:default_t:s0 6 ene 12 01:13 /app/
+[root@central ~]$ semanage fcontext -a -t httpd_sys_content_t '/app(/.*)?'
+[root@central ~]$ restorecon -Rv /app
+Relabeled /app from unconfined_u:object_r:default_t:s0 to unconfined_u:object_r:httpd_sys_content_t:s0
+[root@central ~]$ ls -ldZ /app/
+drwxr-xr-x. 2 root root unconfined_u:object_r:httpd_sys_content_t:s0 6 ene 12 01:13 /app/
+```
+
+
 ### Ajuste de booleanos de SELinux
 
-- **Comando clave**: `semanage boolean`
+Permite **habilitar/deshabilitar** funciones de selinux.
+
+### Comando clave
+
+- `getsebool -a`: Ver todas las políticas.
+- `getsebool httpd_enable_homedirs`: Ver solo una política concreta
+- `semanage boolean -l`: Ver todas las políticas. Además si están activas y arranque. Además de una breve descripción.
+  - httpd_enable_homedirs  (apagado,apagado)  Allow httpd to enable homedirs.
+- `semanage boolean -l -C`. Ver las políticas modificadas.
+- `setsebool -P httpd_enable_homedirs on`: Establecer la política. **Con `-P` ES PERMANENTE**
+- `ausearch -m AVC -ts recent`: Ver eventos recientes. -m [módulo AVC] ts recent [recientes].
 
 ---
 
@@ -214,10 +254,50 @@ restorecon -v /virtual/
 ### Finalización y monitoreo de procesos
 
 - **Comandos clave**:
+  - `kill`. kill -l para mostrar todas las señales disponible (-9 la más comun SIGKILL). 
+  - `pkill`. Matar todos los procesos asociados a un programa.
+    - `pkill -SIGKILL -u usuario`.
+  - `pgrep`. Ver los procesos con nombre.
+  - `ptree`. Ver el árbol de procesos.
   - `kill`, `top`, `htop`: Gestionar procesos.
   - `systemctl status`: Ver estado de servicios.
 
+>[!TIP]
+>Los administradores suelen usar SIGKILL.
+>Siempre es grave porque la señal SIGKILL no puede manipularse ni ignorarse.
+>Sin embargo, obliga a la finalización sin permitir que el proceso terminado ejecute rutinas de autolimpieza.
+>Red Hat recomienda enviar primero SIGTERM, a continuación intentar con SIGINT y, solo si falla en ambos casos, volver a intentar con SIGKILL.
 ---
+
+### Tuned
+
+Ajusta un perfil de rendimiento.
+Puedes hacer un ajuste dinámico (según como el sistema esté funcionando en ese momento) en el archivo de configuración `cat /etc/tuned/tuned-main.conf`.
+
+```bash
+dynamic_tuning = 1
+update_interval = 10
+```
+
+```bash
+dnf install tuned
+systemctl enable --now tuned
+```
+
+```bash
+#VER EL PERFIL ACTUAL
+[root@central]$ tuned-adm active
+Current active profile: virtual-guest
+```
+
+Otros comandos:
+
+- `tuned-adm list`: Listar perfiles.
+- `tuned-adm profile_info`: Proporciona información del perfil actual.
+- `tuned-adm profile otro_perfil`. Activar otro perfil.
+- `tuned-adm recommend`. Te recomienda un perfil.
+- `tuned-adm off`. Apagar tuned. Se reactiva aplicando un perfil.
+
 
 ## 7. Programación de tareas futuras
 
@@ -231,7 +311,14 @@ restorecon -v /virtual/
 
 ### Gestión de paquetes con DNF
 
-- **Comando clave**: `dnf install package-name`
+- **Comando clave**: 
+  - `dnf install package-name`: Instalar paquete.
+  - `dnf list kernel`: Listar todos los paquetes kernel instalados y disponibles.
+  - `dnf group list`: Nombre de grupos isntalados y disponibles.
+  - `dnf group info "RPM Development Tools"`: Información de un grupo.
+  - `tail -5 /var/log/dnf.rpm.log`: Ver log.
+  - `dnf history`: Historial de instalaciones de paquetes.
+  - `dnf history undo 2`: Revierte a un punto de la instalación.
 
 ---
 
@@ -241,7 +328,40 @@ restorecon -v /virtual/
 
 - **Comandos clave**:
   - `mount`, `umount`: Montar y desmontar sistemas de archivos.
-  - `lsblk`: Ver dispositivos de almacenamiento.
+  - `lsblk -fp`: Ver dispositivos de almacenamiento. -p [path] y -f _ver información del disco cono UUID_.
+  - `parted /dev/vda print`: Imprimir particiones.
+  - `parted /dev/sda unit s print`: Imprimir particiones por sectores. s [sector] b [bloque] Mib MB Gib GB.
+
+### Crear particiones de disco
+  
+Crear la tabla de particiones y particiones.
+
+```bash
+[root@host ~]$ parted /dev/sdb mklabel [gpt] [msdos]
+[root@host ~]$ parted /dev/sdb
+GNU Parted 3.4
+Using /dev/sdb
+Welcome to GNU Parted! Type 'help' to view a list of commands.
+(parted) mkpart
+# Para que el sistema lea la nueva particion
+[root@host ~]$ udevadm settle
+```
+
+Todo junto:
+
+- MSDOS: `parted /dev/vdb mkpart primary xfs 2048s 1000MB`.
+- GPT: `parted /dev/vdb mkpart datos xfs 2048s 1000MB`.
+
+Eliminación:
+
+- Interactivo con parted, rm [numero], ejemplo: rm 2.
+- `parted /dev/vdb rm 1`.
+
+> [!IMPORTANT]
+> Para crear particiones de **swap** debemos de usar el tipo de partición `linux-swap`. Para formatearlas con `mkswap`.
+> En el FSTAB pondremos por defecto o con prioridad:
+> UUID=39e2667a-9458-42fe-9665-c5c854605881   swap   swap   defaults   0 0
+> UUID=39e2667a-9458-42fe-9665-c5c854605881   swap   swap   pri=10     0 0
 
 ---
 
@@ -249,7 +369,19 @@ restorecon -v /virtual/
 
 ### Creación de volúmenes lógicos
 
-- **Comando clave**: `lvcreate`
+Aunque no es necesario, se puede crear particiones y marcarlas para LVM _set 1 lvm on_ donde "1" es el número de la partición.
+
+```bash
+parted /dev/sdb mklabel gpt mkpart primary 1MiB 769MiB
+parted /dev/sdb mkpart primary 770MiB 1026MiB
+parted /dev/sdb set 1 lvm on
+parted /dev/sdb set 2 lvm on
+fdisk -l /dev/sdb
+/dev/sdb1      2048 1574911  1572864   768M Linux LVM
+/dev/sdb2   1576960 2101247   524288   256M Linux LVM
+```
+
+Crear volumen VDO: `lvcreate --type vdo --name vdo-lv01 --size 5G vg01`.
 
 ---
 
