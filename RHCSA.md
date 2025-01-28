@@ -193,7 +193,6 @@ chage -m 0 -M 90 -W 7 -I 14 sysadmin05:
   - `restorecon -Rv /var/www/`: Restaura el contexto recursivamente. -R [recursive] -v [verbose]
   - `chcon`
 
-
 `chcon` permite cambiar en contexto de un fichero o directorio temporalmente (se usa de manera temporal para depurar), sin embargo, `restorecon`volverá a poner en contexto original.
 
 ```bash
@@ -232,7 +231,6 @@ Relabeled /app from unconfined_u:object_r:default_t:s0 to unconfined_u:object_r:
 drwxr-xr-x. 2 root root unconfined_u:object_r:httpd_sys_content_t:s0 6 ene 12 01:13 /app/
 ```
 
-
 ### Ajuste de booleanos de SELinux
 
 Permite **habilitar/deshabilitar** funciones de selinux.
@@ -254,7 +252,7 @@ Permite **habilitar/deshabilitar** funciones de selinux.
 ### Finalización y monitoreo de procesos
 
 - **Comandos clave**:
-  - `kill`. kill -l para mostrar todas las señales disponible (-9 la más comun SIGKILL). 
+  - `kill`. kill -l para mostrar todas las señales disponible (-9 la más comun SIGKILL).
   - `pkill`. Matar todos los procesos asociados a un programa.
     - `pkill -SIGKILL -u usuario`.
   - `pgrep`. Ver los procesos con nombre.
@@ -298,7 +296,6 @@ Otros comandos:
 - `tuned-adm recommend`. Te recomienda un perfil.
 - `tuned-adm off`. Apagar tuned. Se reactiva aplicando un perfil.
 
-
 ## 7. Programación de tareas futuras
 
 ### Uso de cron
@@ -311,7 +308,7 @@ Otros comandos:
 
 ### Gestión de paquetes con DNF
 
-- **Comando clave**: 
+- **Comando clave**:
   - `dnf install package-name`: Instalar paquete.
   - `dnf list kernel`: Listar todos los paquetes kernel instalados y disponibles.
   - `dnf group list`: Nombre de grupos isntalados y disponibles.
@@ -389,7 +386,39 @@ Crear volumen VDO: `lvcreate --type vdo --name vdo-lv01 --size 5G vg01`.
 
 ### Control de servicios
 
-- **Comando clave**: `systemctl start/stop/restart service-name`
+**Comando clave**:
+
+- `systemctl start/stop/restart service-name`.
+- `systemctl list-units --type=service`: Listar todos los servicios **activos**.
+- `systemctl list-units --type=service`: Listar todos los servicios **activos y no activos**.
+- `systemctl`: Unidades cargadas y activas.
+
+### Configuración de un target
+
+Se puede iniciar un target aislado `systemctl isolate multi-user.target`, siempre que tengan la propiedad **AllowIsolate=yes** cuando se ejecuta `systemctl cat graphical.target`.
+Target Comunes:
+
+- multi-user.target: Modo texto.
+- graphical.target: Modo GUI.
+- rescue.target: Para reparar el sistema.
+- emergency.target: Componente mínimos.
+  
+**Comandos clave**
+
+- `systemctl get-default`: Ver el target por defecto.
+- `systemctl set-default graphical.target`: Establecer un target por defecto.
+
+### Restablecer contraseña de root
+
+- Arrancar y editar la entrada del kernel `rd.break`. Esto hace un quiebre del sistema antes de entregarlo a initramfs.
+- `mount -o remount,rw /sysroot`.
+- `chroot /sysroot`.
+- `passwd root`.
+- `touch /.aurelabel`.
+- `exit`.
+
+>[!TIP]
+>Para habilitar una debug shell en el kernel durante el arranque incidia con `systemd.debug-shell`.
 
 ---
 
@@ -397,7 +426,54 @@ Crear volumen VDO: `lvcreate --type vdo --name vdo-lv01 --size 5G vg01`.
 
 ### Revisión de logs del sistema
 
-- **Comando clave**: `journalctl`
+Configuración de rsyslog, mensajes populares
+
+- kern
+- user
+- mail
+- auth
+
+Nivel de criticidad:
+
+- emerg
+- crit
+- alert
+- info
+- debug
+
+Ejemplo de configuracion **authpriv.*   /var/log/secure**.
+Ejemplo de logger **logger -p user.debug "Log entry created on host"**.
+
+Comando **`journalctl`**:
+
+- -n5: Muestra las últimas 5 líneas.
+- -f: follow.
+- -p err: Muestra priridad error.
+- -u ssh.service: Unidad ssh.
+- --since today. Desde hoy.
+- --since "2022-03-11 20:30" --until "2022-03-14 10:00": Desde X hasta X.
+- --since "-1 hour": Desde hace una hora.
+
+Otros más especiales:
+
+_COMM: nombre del comando.
+_EXE: ruta hacia el archivo ejecutable para el proceso
+_PID: PID del proceso.
+_UID: UID del usuario que ejecuta el proceso.
+_SYSTEMD_UNIT: unidad systemd que inició el proceso
+
+Ejemplos:
+
+- journalctl _SYSTEMD_UNIT=sshd.service _PID=2110
+- journalctl _UID=81
+- journalctl _PID=1
+
+Los logs de journal son volátiles, se debe configurar en **/etc/systemd/journald.conf**. Para hacerlo persistente a los reinicios, se debe configurar el parámetro **Storage**:
+
+- auto: Por defecto, si existe /var/log/journal. Entonces guarda los logs.
+- persistent: Los guarda en /var/log/journal. Si no existe el directorio, lo crea.
+- volatile: Almacena los diarios en el directorio /run/log/journal volátil.
+- none: Sin registros.
 
 ---
 
