@@ -403,7 +403,7 @@ Target Comunes:
 - rescue.target: Para reparar el sistema.
 - emergency.target: Componente mínimos.
   
-**Comandos clave**
+#### Comandos clave
 
 - `systemctl get-default`: Ver el target por defecto.
 - `systemctl set-default graphical.target`: Establecer un target por defecto.
@@ -441,7 +441,7 @@ Nivel de criticidad:
 - info
 - debug
 
-Ejemplo de configuracion **authpriv.*   /var/log/secure**.
+Ejemplo de configuracion **authpriv.\*   /var/log/secure**.
 Ejemplo de logger **logger -p user.debug "Log entry created on host"**.
 
 ### Journalctl
@@ -506,15 +506,14 @@ Los logs de journal son volátiles, se debe configurar en **/etc/systemd/journal
 - nmcli dev disconnect ens3: Dessconectar la interfaz (mejor que down).
 - nmcli con del ens3: Borrar una conexión.
 - nmcli con add \
-  con-name eno2 \ 
-  type ethernet \ 
+  con-name eno2 \
+  type ethernet \
   ifname eno2 \
   ipv4.method manual \
-  ipv4.addresses 192.168.1.10 \ 
-  ipv4.gateway 192.168.1.1 
+  ipv4.addresses 192.168.1.10 \
+  ipv4.gateway 192.168.1.1
 - nmcli con mod ID +ipv4.dns IP: Añadir DNS. Si no se pone "+" lo sobrescribe.
 - ip -br addr show enp0s3: Ver la IP y estado de enp0s3.
-
 
 #### Resolución de nombres
 
@@ -545,6 +544,7 @@ Los logs de journal son volátiles, se debe configurar en **/etc/systemd/journal
 ### AutoFS
 
 Mapa indirecto: /etc/auto.master.d/demo.autofs + /etc/auto.demo
+
 ```bash
 # /etc/auto.master.d/demo.autofs
 /externo /etc/auto.demo
@@ -575,7 +575,6 @@ Mapa directo: /etc/auto.master.d/demo.autofs + /etc/auto.direct
 
 Las rutas son absolutas.
 
-
 ### Firewalld y Selinux
 
 - firewall-cmd --get-services: Obtener servicios
@@ -584,7 +583,6 @@ Las rutas son absolutas.
 - semanage port -l -C: Ver los cambios en la política predeterminada.
 - semanage port -d -t gopher_port_t -p tcp 71: Eliminar la etiqueta de un puerto.
 - semanage port -m -t http_port_t -p tcp 71: Modificar la etiqueta de un puerto.
-
 
 ---
 
