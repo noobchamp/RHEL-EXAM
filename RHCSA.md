@@ -424,7 +424,7 @@ Target Comunes:
 
 ## 12. Análisis y almacenamiento de registros
 
-### Revisión de logs del sistema
+### Rsyslog
 
 Configuración de rsyslog, mensajes populares
 
@@ -444,7 +444,7 @@ Nivel de criticidad:
 Ejemplo de configuracion **authpriv.*   /var/log/secure**.
 Ejemplo de logger **logger -p user.debug "Log entry created on host"**.
 
-Comando **`journalctl`**:
+### Journalctl
 
 - -n5: Muestra las últimas 5 líneas.
 - -f: follow.
@@ -453,6 +453,7 @@ Comando **`journalctl`**:
 - --since today. Desde hoy.
 - --since "2022-03-11 20:30" --until "2022-03-14 10:00": Desde X hasta X.
 - --since "-1 hour": Desde hace una hora.
+- --list-boots. Listar arranques.
 
 Otros más especiales:
 
@@ -475,13 +476,54 @@ Los logs de journal son volátiles, se debe configurar en **/etc/systemd/journal
 - volatile: Almacena los diarios en el directorio /run/log/journal volátil.
 - none: Sin registros.
 
+### Timedatectl
+
+- timedatectl list-timezones
+- timedatectl set-timezone America/Phoenix
+- timedatectl set-ntp [true] [false]
+- chronyc sources -v
+
 ---
 
 ## 13. Gestión de redes
 
 ### Configuración de redes desde la línea de comandos
 
-- **Comando clave**: `nmcli`
+#### Validación
+
+- ip link show: Ver las interfaces.
+- ip link -s show ens3: ver la ens3 con estadísticas.
+- ip addr show ens3: Ver la IP de ens3.
+- ip route: Ver tabla de enrutamiento.
+- tracepath access.redhat.com: Rastreo de las rutas.
+- ss -ta. Igual que **netstat**.
+
+#### Configuración
+
+- nmcli dev status: Estado (conectado/no conectado) de los dispositivos.
+- nmcli conn show [--active]: Lista todas las conexiones.
+- nmcli conn [up] [down] [reload]: Activar / desactivar / recargar.
+- nmcli dev disconnect ens3: Dessconectar la interfaz (mejor que down).
+- nmcli con del ens3: Borrar una conexión.
+- nmcli con add \
+  con-name eno2 \ 
+  type ethernet \ 
+  ifname eno2 \
+  ipv4.method manual \
+  ipv4.addresses 192.168.1.10 \ 
+  ipv4.gateway 192.168.1.1 
+- nmcli con mod ID +ipv4.dns IP: Añadir DNS. Si no se pone "+" lo sobrescribe.
+- ip -br addr show enp0s3: Ver la IP y estado de enp0s3.
+
+
+#### Resolución de nombres
+
+- hostname: Consulta el nombre.
+- hostnamectl status: Ver el nombre stático y transient.
+- hostnamectl hostname host.example.com: Establece un nombre.
+- getent hosts hostname: Busca resolver un nombre **primero mira /etc/hosts**.
+- host marca.com: Resolver nombre **no consulta /etc/hosts**
+- dig marca.com: Resolver nombre **no consulta /etc/hosts**
 
 ---
 
@@ -495,9 +537,54 @@ Los logs de journal son volátiles, se debe configurar en **/etc/systemd/journal
 
 ## 15. Gestión de la seguridad de redes
 
-### Configuración de firewalls
+### NFS
 
-- **Comando clave**: `firewalld`
+- showmount --exports server: Ver los FS que se sirven desde el host.
+- mount -t nfs -o rw,sync server:/export /mountpoint: Montaje de un nfs.
+
+### AutoFS
+
+Mapa indirecto: /etc/auto.master.d/demo.autofs + /etc/auto.demo
+```bash
+# /etc/auto.master.d/demo.autofs
+/externo /etc/auto.demo
+```
+
+```bash
+# /etc/auto.demo
+work  -rw,sync  serverb:/shares/work
+holydays  -r,sync  serverb:/shares/holydays
+```
+
+Por tanto todo estará en _externo_:
+/externo/work
+/externo/holydays
+
+Mapa directo: /etc/auto.master.d/demo.autofs + /etc/auto.direct
+
+```bash
+# /etc/auto.master.d/demo.autofs
+/- /etc/auto.direct
+```
+
+```bash
+# /etc/auto.direct
+/mnt/work  -rw,sync  serverb:/shares/work
+/home/holydays  -r,sync  serverb:/shares/holydays
+```
+
+Las rutas son absolutas.
+
+
+### Firewalld y Selinux
+
+- firewall-cmd --get-services: Obtener servicios
+- semanage port -l: Enumerar asignaciones de etiquetas de puerto actuales.
+- semanage port -a -t port_label -p tcp|udp PORTNUMBER: Agregar un puerto a Selinux. Ej: semanage port -a -t gopher_port_t -p tcp 71
+- semanage port -l -C: Ver los cambios en la política predeterminada.
+- semanage port -d -t gopher_port_t -p tcp 71: Eliminar la etiqueta de un puerto.
+- semanage port -m -t http_port_t -p tcp 71: Modificar la etiqueta de un puerto.
+
 
 ---
 
