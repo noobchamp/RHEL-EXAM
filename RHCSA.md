@@ -1,26 +1,63 @@
 # RHCSA Rapid Track - Preparación Completa para el Examen RHCSA (RHEL 9)
 
-Este documento es una guía rápida basada en el curso RH199 para preparar el examen RHCSA en RHEL 9.
-
-## Tabla de Contenidos
-
-1. Acceso a los sistemas y obtención de soporte
-2. Gestión de archivos desde la línea de comandos
-3. Gestión de usuarios y grupos locales
-4. Control de acceso a archivos
-5. Gestión de la seguridad con SELinux
-6. Ajuste del rendimiento del sistema
-7. Programación de tareas futuras
-8. Instalación y actualización de paquetes de software
-9. Gestión de almacenamiento básico
-10. Gestión de la pila de almacenamiento
-11. Servicios de control y procesos de arranque
-12. Análisis y almacenamiento de registros
-13. Gestión de redes
-14. Acceso al almacenamiento conectado a la red
-15. Gestión de la seguridad de redes
-16. Ejecución de contenedores
-17. Revisión exhaustiva
+- [RHCSA Rapid Track - Preparación Completa para el Examen RHCSA (RHEL 9)](#rhcsa-rapid-track---preparación-completa-para-el-examen-rhcsa-rhel-9)
+  - [1. Acceso a los sistemas y obtención de soporte](#1-acceso-a-los-sistemas-y-obtención-de-soporte)
+    - [Edición de archivos de texto desde el prompt de shell (Vim)](#edición-de-archivos-de-texto-desde-el-prompt-de-shell-vim)
+    - [Configuración de autenticación basada en claves SSH](#configuración-de-autenticación-basada-en-claves-ssh)
+    - [Creación de un informe de diagnóstico](#creación-de-un-informe-de-diagnóstico)
+  - [2. Gestión de archivos desde la línea de comandos](#2-gestión-de-archivos-desde-la-línea-de-comandos)
+    - [Comandos básicos de gestión de archivos](#comandos-básicos-de-gestión-de-archivos)
+  - [3. Gestión de usuarios y grupos locales](#3-gestión-de-usuarios-y-grupos-locales)
+    - [Creación y administración de usuarios](#creación-y-administración-de-usuarios)
+  - [4. Control de acceso a archivos](#4-control-de-acceso-a-archivos)
+    - [Gestión de permisos de archivos](#gestión-de-permisos-de-archivos)
+    - [Permisos especiales](#permisos-especiales)
+  - [5. Gestión de la seguridad de SELinux](#5-gestión-de-la-seguridad-de-selinux)
+    - [Modificación de los modos de SELinux](#modificación-de-los-modos-de-selinux)
+    - [Crear una nueva etiqueta](#crear-una-nueva-etiqueta)
+    - [Ajuste de booleanos de SELinux](#ajuste-de-booleanos-de-selinux)
+    - [Comando clave](#comando-clave)
+  - [6. Ajuste del rendimiento del sistema](#6-ajuste-del-rendimiento-del-sistema)
+    - [Finalización y monitoreo de procesos](#finalización-y-monitoreo-de-procesos)
+    - [Tuned](#tuned)
+  - [7. Programación de tareas futuras](#7-programación-de-tareas-futuras)
+    - [Uso de cron](#uso-de-cron)
+  - [8. Instalación y actualización de paquetes de software](#8-instalación-y-actualización-de-paquetes-de-software)
+    - [Gestión de paquetes con DNF](#gestión-de-paquetes-con-dnf)
+  - [9. Gestión de almacenamiento básico](#9-gestión-de-almacenamiento-básico)
+    - [Montaje de sistemas de archivos](#montaje-de-sistemas-de-archivos)
+    - [Crear particiones de disco](#crear-particiones-de-disco)
+  - [10. Gestión de la pila de almacenamiento](#10-gestión-de-la-pila-de-almacenamiento)
+    - [Creación de volúmenes lógicos](#creación-de-volúmenes-lógicos)
+  - [11. Servicios de control y proceso de arranque](#11-servicios-de-control-y-proceso-de-arranque)
+    - [Control de servicios](#control-de-servicios)
+    - [Configuración de un target](#configuración-de-un-target)
+      - [Comandos clave](#comandos-clave)
+    - [Restablecer contraseña de root](#restablecer-contraseña-de-root)
+  - [12. Análisis y almacenamiento de registros](#12-análisis-y-almacenamiento-de-registros)
+    - [Rsyslog](#rsyslog)
+    - [Journalctl](#journalctl)
+    - [Timedatectl](#timedatectl)
+  - [13. Gestión de redes](#13-gestión-de-redes)
+    - [Configuración de redes desde la línea de comandos](#configuración-de-redes-desde-la-línea-de-comandos)
+      - [Validación](#validación)
+      - [Configuración](#configuración)
+      - [Resolución de nombres](#resolución-de-nombres)
+  - [14. Acceso al almacenamiento conectado a la red](#14-acceso-al-almacenamiento-conectado-a-la-red)
+    - [Gestión de almacenamiento NFS](#gestión-de-almacenamiento-nfs)
+  - [15. Gestión de la seguridad de redes](#15-gestión-de-la-seguridad-de-redes)
+    - [NFS](#nfs)
+    - [AutoFS](#autofs)
+    - [Firewalld y Selinux](#firewalld-y-selinux)
+  - [16. Ejecución de contenedores](#16-ejecución-de-contenedores)
+    - [Uso de contenedores](#uso-de-contenedores)
+      - [Aislamiento de contenedores](#aislamiento-de-contenedores)
+        - [Ajustar permisos con `podman unshare`](#ajustar-permisos-con-podman-unshare)
+        - [Montar el volumen en el contenedor](#montar-el-volumen-en-el-contenedor)
+    - [Crear una red](#crear-una-red)
+    - [Gestión de contenedores como servicios del sistema](#gestión-de-contenedores-como-servicios-del-sistema)
+      - [Ejecución independiente del login](#ejecución-independiente-del-login)
+  - [Repaso](#repaso)
 
 ---
 
@@ -75,6 +112,7 @@ Este documento es una guía rápida basada en el curso RH199 para preparar el ex
 - **Comandos clave**:
   - `chage -d 0 cloudadmin10`: El usuario debe cambiar la contraseña en el próximo inico de sesión.
   - `usermod -L`: Bloquea la cuenta del usuario.
+  - `usermod -U`: Desbloquea la cuenta.
   - `usermod -L -e 2022-08-14 cloudadmin10`: Bloquear la cuenta el día 14/08/2022.
   - `usermod -s /sbin/nologin newapp`: Cuenta sin login.
 
@@ -98,7 +136,7 @@ chage -m 0 -M 90 -W 7 -I 14 sysadmin05:
 - `-M 90`: Especifica el **máximo número de días que una contraseña puede ser utilizada**. La contraseña caducará después de 90 días.  
 - `-W 7`: Define el **número de días de advertencia antes de la caducidad de la contraseña**. El usuario recibirá una notificación 7 días antes de que la contraseña expire.  
 - `-I 14`: Establece el **número de días de inactividad permitidos después de la caducidad de la contraseña**. Si el usuario no cambia su contraseña en los 14 días posteriores a la caducidad, la cuenta será bloqueada.  
-- `usuario`: Especifica el **nombre del usuario** al que se aplican las políticas definidas.  
+
 
 > [!TIP]
  Puedes cambiar la configuración de vigencia de la contraseña predeterminada en el archivo /etc/login.defs. Las opciones PASS_MAX_DAYS y PASS_MIN_DAYS establecen la antigüedad máxima y mínima predeterminada de la contraseña, respectivamente. PASS_WARN_AGE define el período de advertencia predeterminado de la contraseña.
@@ -781,3 +819,9 @@ loginctl enable-linger
 # Desactivar Lingerin
 loginctl disable-linger 
 ```
+
+---
+
+## Repaso
+
+- BLoquea y desbloquea un usuario.
