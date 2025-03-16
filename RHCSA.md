@@ -789,7 +789,7 @@ Se debe definir el directorio manualmente ~/.config/systemd/user/
 > El directorio _user_ es tal cual!!, no es el nombre de usuario, no funciona si es otro nombre!!
 
 ```bash
- mkdir -p ~/.config/systemd/oliva
+ mkdir -p ~/.config/systemd/user
 ```
 
 Use el comando `podman generate systemd --name nombre_contenedor`. El resultado te dará la salida por pantalla de lo que debería ser el archivo.
