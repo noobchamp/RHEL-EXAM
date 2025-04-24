@@ -391,6 +391,7 @@ Eliminación:
 
 - Interactivo con parted, rm [numero], ejemplo: rm 2.
 - `parted /dev/vdb rm 1`.
+- Borrar el disco completo: wipefs -a /dev/sda
 
 > [!IMPORTANT]
 > Para crear particiones de **swap** debemos de usar el tipo de partición `linux-swap`. Para formatearlas con `mkswap`.
