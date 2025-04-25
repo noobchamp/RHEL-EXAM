@@ -419,6 +419,8 @@ fdisk -l /dev/sdb
 
 Crear volumen VDO: `lvcreate --type vdo --name vdo-lv01 --size 5G vg01`.
 
+> [!TIP]
+> Arrancar en modo de emergencia por fallo del fstab: `systemd.unit=emergency.target`
 ---
 
 ## 11. Servicios de control y proceso de arranque
