@@ -22,6 +22,7 @@
     - [Tuned](#tuned)
   - [7. Programación de tareas futuras](#7-programación-de-tareas-futuras)
     - [Uso de cron](#uso-de-cron)
+    - [Archivos temporales](#archivos-temporales)
   - [8. Instalación y actualización de paquetes de software](#8-instalación-y-actualización-de-paquetes-de-software)
     - [Gestión de paquetes con DNF](#gestión-de-paquetes-con-dnf)
   - [9. Gestión de almacenamiento básico](#9-gestión-de-almacenamiento-básico)
@@ -340,6 +341,19 @@ Otros comandos:
 
 - **Comando clave**: `crontab -e`
 
+### Archivos temporales
+
+Crear un archivo de configuracion en `/etc/tmpfiles.d/archivo.conf`
+```
+d /run/momentary 0700 root root 30s
+```
+
+```bash
+# Crear
+systemd-tmpfiles --create /etc/tmpfiles.d/archivo.conf
+# Limpiar
+systemd-tmpfiles --clean /etc/tmpfiles.d/archivo.conf
+```
 ---
 
 ## 8. Instalación y actualización de paquetes de software
@@ -455,7 +469,7 @@ Target Comunes:
 - `mount -o remount,rw /sysroot`.
 - `chroot /sysroot`.
 - `passwd root`.
-- `touch /.aurelabel`.
+- `touch /.autorelabel`.
 - `exit`.
 
 >[!TIP]
@@ -547,9 +561,9 @@ Los logs de journal son volátiles, se debe configurar en **/etc/systemd/journal
 - nmcli dev disconnect ens3: Dessconectar la interfaz (mejor que down).
 - nmcli con del ens3: Borrar una conexión.
 - nmcli con add \
-  con-name eno2 \
+  con-name lab \
   type ethernet \
-  ifname eno2 \
+  ifname eth0 \
   ipv4.method manual \
   ipv4.addresses 192.168.1.10 \
   ipv4.gateway 192.168.1.1
@@ -628,6 +642,14 @@ Las rutas son absolutas.
 ---
 
 ## 16. Ejecución de contenedores
+
+Instalar las herramientas:
+
+```bash
+dnf install container-tools
+```
+
+Registro automático con `/etc/containers/registries.conf` como plantilla, copiar el archivo a `~/.config/containers/registries.conf`.
 
 ### Uso de contenedores
 
